@@ -9,7 +9,7 @@ namespace Utils.Html2Markdown
     {
         static async Task Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("Converting");
             await ConvertFiles(@"C:\git\school-materials", "csharp", "*.php");
             await ConvertFiles(@"C:\git\school-materials", "xamarin", "*.php");
             await ConvertFiles(@"C:\git\school-materials", "zadani", "*.php");
@@ -33,13 +33,14 @@ namespace Utils.Html2Markdown
                 Console.WriteLine(dirInfo);
                 System.IO.FileInfo fi = new System.IO.FileInfo(dirInfo);
                 if (fi.Name.Equals("index.php")) continue;
-
+                
+                string date = DateTime.Now.ToString("yyyy-MM-dd");
                 string parent = Directory.GetParent(dirInfo).Name;
 
                 var markdown = HTML2Markdown(await File.ReadAllTextAsync(fi.FullName));
 
                 Directory.CreateDirectory($"C:\\git\\school-materials-export\\{folder}\\{parent}");
-                File.WriteAllText($"C:\\git\\school-materials-export\\{folder}\\{parent}\\{Path.GetFileNameWithoutExtension(fi.Name)}" + ".md", markdown);
+                File.WriteAllText($"C:\\git\\school-materials-export\\{folder}\\{parent}\\{date}-{Path.GetFileNameWithoutExtension(fi.Name)}" + ".md", markdown);
 
             }
         }

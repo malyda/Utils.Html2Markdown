@@ -82,10 +82,10 @@ namespace Utils.Html2Markdown
 
                     string header = $@"---
 layout: post
-title: ""{ matchingHeadItem.FirstOrDefault().Name} ""
+title: ""{ matchingHeadItem.FirstOrDefault().Title} ""
 categories:
     -""{folder}""
-    -""{folder}""
+    -""{topHeadItem.Name}""
 author: ""David Malý""
 --- 
 

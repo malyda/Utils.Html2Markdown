@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using YamlDotNet.RepresentationModel;
 
 namespace Utils.Html2Markdown
 {
@@ -15,53 +16,64 @@ namespace Utils.Html2Markdown
     {
         static async Task Main(string[] args)
         {
+
+
+
             Console.WriteLine("Converting");
             await ConvertFiles(@"C:\git\school-materials", "csharp", "*.php");
-            await ConvertFiles(@"C:\git\school-materials", "xamarin", "*.php");
-            await ConvertFiles(@"C:\git\school-materials", "zadani", "*.php");
+           // await ConvertFiles(@"C:\git\school-materials", "xamarin", "*.php");
+           // await ConvertFiles(@"C:\git\school-materials", "zadani", "*.php");
             Console.WriteLine("Done");
             Console.ReadKey();
         }
 
-        static string HTML2Markdown(string html)
+
+
+
+        static async Task<List<Category>> GetCategories(string fullPath)
         {
-            var config = new ReverseMarkdown.Config
+            var categories = await Parsers.ParseHead<Category>(fullPath);
+            for (int i = 0; i < categories.Count(); i++)
             {
-                UnknownTags = Config.UnknownTagsOption.PassThrough,
-                GithubFlavored = true,
-                SmartHrefHandling = true // remove markdown output for links where appropriate
-            };
+                DirectoryInfo di = new DirectoryInfo(Path.Combine(fullPath, categories[i].Name));
+                var files = di.GetFiles();
 
-            var converter = new ReverseMarkdown.Converter(config);
-            string result = converter.Convert(html);
-
-            return result;
+                categories[i].Pages =  await Parsers.ParseHead<Page>(Path.Combine(fullPath, categories[i].Name));
+            }
+            return categories;
         }
 
-
-     
 
         static async Task ConvertFiles(string path, string folder, string search)
         {
             var fullPath = $"{path}\\{folder}\\article";
-            
-           // DirectoryInfo[] dirs = di.GetDirectories();
 
             Console.WriteLine();
             Console.WriteLine(folder);
+            
+            List<Category> categories = await GetCategories(fullPath);
 
-            List<HeadItem> topHeadItems = await parseHead(fullPath);
+
+            const string initialContent = "---\nversion: 1\n...";
+
+            var sr = new StringReader(initialContent);
+            var stream = new YamlStream();
+            stream.Load(sr);
+
+            var rootMappingNode = (YamlMappingNode) stream.Documents[0].RootNode;
+
+            Parsers.GenerateYamlFromCategories(rootMappingNode, categories, folder);
+
+            using (TextWriter writer = File.CreateText($"C:\\git\\school-materials-export\\{folder}.yaml"))
+                stream.Save(writer, false);
 
 
             Console.WriteLine();
-            foreach (var topHeadItem in topHeadItems)
+            foreach (var categorory in categories)
             {
-                Console.WriteLine(topHeadItem.Name);
-                DirectoryInfo di = new DirectoryInfo(Path.Combine(fullPath, topHeadItem.Name));
+                Console.WriteLine(categorory.Name);
+                DirectoryInfo di = new DirectoryInfo(Path.Combine(fullPath, categorory.Name));
                 var files = di.GetFiles();
-
-                List<HeadItem> headItems = await parseHead(Path.Combine( fullPath, topHeadItem.Name) );
-
 
                 foreach (var fInfo in files)
                 {
@@ -69,48 +81,39 @@ namespace Utils.Html2Markdown
                     
                     // find all files with name from head and create correct header
 
-                    var matchingHeadItem = from headItem in headItems
+                    var matchingHeadItem = from headItem in categorory.Pages
                                                where headItem.NameWithoutExtension == Path.GetFileNameWithoutExtension(fInfo.Name)
                                                select headItem;
 
                     if (matchingHeadItem.FirstOrDefault() == null) continue;
                     Console.WriteLine(matchingHeadItem.FirstOrDefault().Name);
+                    var matchingHeadItemIIndex = categorory.Pages.IndexOf(matchingHeadItem.FirstOrDefault());
 
-                    string date = DateTime.Now.ToString("yyyy-MM-dd");
+                    
 
-                    var markdown = HTML2Markdown(await File.ReadAllTextAsync(fInfo.FullName));
+                    var markdown = Parsers.HTML2Markdown(await File.ReadAllTextAsync(fInfo.FullName));
 
                     string header = $@"---
 layout: post
 title: ""{ matchingHeadItem.FirstOrDefault().Title} ""
 categories:
-    -""{folder}""
-    -""{topHeadItem.Name}""
+    - ""{folder}""
+    - ""{categorory.Name}""
+sort_index: {matchingHeadItemIIndex}
 author: ""David Malý""
 --- 
 
 ";
-                    Directory.CreateDirectory($"C:\\git\\school-materials-export\\{folder}\\{topHeadItem.Name}");
-                    File.WriteAllText($"C:\\git\\school-materials-export\\{folder}\\{topHeadItem.Name}\\{date}-{Path.GetFileNameWithoutExtension(fInfo.Name)}" + ".md", header + markdown);
+                    Directory.CreateDirectory($"C:\\git\\school-materials-export\\{folder}\\{categorory.Name}");
+                    File.WriteAllText($"C:\\git\\school-materials-export\\{folder}\\{categorory.Name}\\{Helpers.CurrentDateFileName}-{Path.GetFileNameWithoutExtension(fInfo.Name)}" + ".md", header + markdown);
                 }
 
             }
         }
 
-        static async Task<List<HeadItem>> parseHead(string path)
-        {
-            List<HeadItem> headItems = new List<HeadItem>();
-            var lines = await File.ReadAllLinesAsync(Path.Combine(path, "head.txt"));
-            foreach(var line in lines)
-            {
-                var splited = line.Split(";");
-                headItems.Add(new HeadItem
-                {
-                    Title = splited[0],
-                    Name = splited[1]
-                });
-            }
-            return headItems;
-        }
+
+
+
+       
     }
 }

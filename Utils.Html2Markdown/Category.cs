@@ -4,9 +4,8 @@ using System.Text;
 
 namespace Utils.Html2Markdown
 {
-    abstract class HeadItem
+    class Category : HeadItem
     {
-        public string Title { get; set; }
-        public string Name { get; set; }
+        public List<Page> Pages { get; set; }
     }
 }

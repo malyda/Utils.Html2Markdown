@@ -2,10 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using YamlDotNet.RepresentationModel;
-using YamlDotNet.Serialization;
 
 namespace Utils.Html2Markdown
 {
@@ -24,7 +23,10 @@ namespace Utils.Html2Markdown
             var converter = new ReverseMarkdown.Converter(config);
             string result = converter.Convert(html);
 
-            return result;
+            // trim all tags
+            string noHTML = Regex.Replace(result, "<.*?>", String.Empty);
+
+            return noHTML;
         }
 
 

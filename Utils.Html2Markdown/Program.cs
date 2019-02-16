@@ -21,8 +21,8 @@ namespace Utils.Html2Markdown
 
             Console.WriteLine("Converting");
             await ConvertFiles(@"C:\git\school-materials", "csharp", "*.php");
-           // await ConvertFiles(@"C:\git\school-materials", "xamarin", "*.php");
-           // await ConvertFiles(@"C:\git\school-materials", "zadani", "*.php");
+            await ConvertFiles(@"C:\git\school-materials", "xamarin", "*.php");
+            await ConvertFiles(@"C:\git\school-materials", "zadani", "*.php");
             Console.WriteLine("Done");
             Console.ReadKey();
         }
@@ -64,7 +64,8 @@ namespace Utils.Html2Markdown
 
             Parsers.GenerateYamlFromCategories(rootMappingNode, categories, folder);
 
-            using (TextWriter writer = File.CreateText($"C:\\git\\school-materials-export\\{folder}.yaml"))
+            Directory.CreateDirectory($"C:\\git\\export\\_data\\");
+            using (TextWriter writer = File.CreateText($"C:\\git\\export\\_data\\{folder}.yaml"))
                 stream.Save(writer, false);
 
 
@@ -104,8 +105,8 @@ author: ""David Malý""
 --- 
 
 ";
-                    Directory.CreateDirectory($"C:\\git\\school-materials-export\\{folder}\\{categorory.Name}");
-                    File.WriteAllText($"C:\\git\\school-materials-export\\{folder}\\{categorory.Name}\\{Helpers.CurrentDateFileName}-{Path.GetFileNameWithoutExtension(fInfo.Name)}" + ".md", header + markdown);
+                    Directory.CreateDirectory($"C:\\git\\export\\school-materials-export\\{folder}\\{categorory.Name}");
+                    File.WriteAllText($"C:\\git\\export\\school-materials-export\\{folder}\\{categorory.Name}\\{Helpers.CurrentDateFileName}-{Path.GetFileNameWithoutExtension(fInfo.Name)}" + ".md", header + markdown);
                 }
 
             }

@@ -36,11 +36,11 @@ namespace Utils.Html2Markdown
             var lines = await File.ReadAllLinesAsync(Path.Combine(path, "head.txt"));
             foreach (var line in lines)
             {
-                var splited = line.Split(";");
+                var splited = line.Split(";"); 
                 headItems.Add(new T
                 {
-                    Title = splited[0],
-                    Name = splited[1]
+                    Title = splited[0].Trim() ,
+                    Name = splited[1].Trim().Replace(' ','-')
                 });
             }
             return headItems;
@@ -58,23 +58,15 @@ namespace Utils.Html2Markdown
                 {
                     var prop = new YamlMappingNode();
                     prop.Add("title", page.Title);
-                    prop.Add("url", $"{Helpers.CurrentDateURL}/{Path.GetFileNameWithoutExtension(page.Name)}" );
+                    prop.Add("filename", $"{DateHelpers.DateURL}/{Path.GetFileNameWithoutExtension(page.Name)}" );
                     categoriesSeq.Add(prop);
                 }
-               // var seq2 = new YamlSequenceNode();
-
                 var prop2 = new YamlMappingNode("title", category.Title);
-                var prop3 = new YamlMappingNode("pages", categoriesSeq);
-                //seq.Add(prop2);
-
+                prop2.Add("folder", category.Name);
+                prop2.Add("pages", categoriesSeq);
                 seq.Add(prop2);
-                seq.Add(prop3);
-               // seq.Add(seq);
-                // categoriesSeq.Add(seq);
             }
             rootMappingNode.Add("categories", seq);
-
-        //    File.WriteAllText($"C:\\git\\school-materials-export\\{material}.yaml", yaml);
 
         }
     }

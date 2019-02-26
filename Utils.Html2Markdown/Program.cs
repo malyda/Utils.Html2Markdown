@@ -106,7 +106,7 @@ author: ""David Malý""
 
 ";
                     Directory.CreateDirectory($"C:\\git\\export\\school-materials-export\\{folder}\\{categorory.Name}");
-                    File.WriteAllText($"C:\\git\\export\\school-materials-export\\{folder}\\{categorory.Name}\\{Helpers.CurrentDateFileName}-{Path.GetFileNameWithoutExtension(fInfo.Name)}" + ".md", header + markdown);
+                    File.WriteAllText($"C:\\git\\export\\school-materials-export\\{folder}\\{categorory.Name}\\{DateHelpers.DateFileName}-{Path.GetFileNameWithoutExtension(fInfo.Name)}" + ".md", header + markdown);
                 }
 
             }

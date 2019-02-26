@@ -4,21 +4,22 @@ using System.Text;
 
 namespace Utils.Html2Markdown
 {
-    class Helpers
+    class DateHelpers
     {
-        public static string CurrentDateFileName
+        static DateTime hardDate = new DateTime(2019, 02, 16);
+        public static string DateFileName
         {
             get
             {
-                return DateTime.Now.ToString("yyyy-MM-dd");
+                return hardDate.ToString("yyyy-MM-dd");
             }
         }
 
-        public static string CurrentDateURL
+        public static string DateURL
         {
             get
             {
-                return DateTime.Now.ToString("yyyy'/'MM'/'dd");
+                return hardDate.ToString("yyyy'/'MM'/'dd");
             }
         }
     }
